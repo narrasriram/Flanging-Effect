@@ -1,0 +1,75 @@
+# -*- coding: utf-8 -*-
+
+# program: flanging_effect_program.py
+# author: Sriram Narra
+# course: CS 827
+# date: November 20th 2018
+# Assignment #3
+# description: this program reads in a filename.wav file with 
+#              open funtion in wave package, applies a user defined  
+#              Flanger Effect and writes out to a filename.wav file. 
+# ------------------------------------------------------------------
+
+
+# Import required packages
+import wave
+from audioop import add
+from audioop import mul
+
+#----------------------------------------------------------------
+# function: input_wave
+# purpose: reads the input file and returns the file content
+# parameter(s): <2> string (filename), int frames
+# return:  <2> _wave_params (params), object (audio_bytes)
+
+def input_wave(filename,frames=10000000):
+    with wave.open(filename,'rb') as wave_file:
+        params=wave_file.getparams()
+        audio_bytes=wave_file.readframes(frames)  
+        if params.nchannels!=1:
+            raise Exception("The input audio should be mono for these examples")
+    return params, audio_bytes
+
+#----------------------------------------------------------------
+# function: output_wave
+# purpose: writes the flanging effect file content to output file
+# parameter(s): <4> object (audio_bytes),
+#                   _wave_params (params),
+#                   string (outputfile), 
+#                   string (outputfilenamesuffix)
+    
+def output_wave(audio_bytes, params, outputfile, suffix):
+    #dynamically format the filename by passing in data
+    filename=outputfile.replace('.wav','_{}.wav'.format(suffix))
+    with wave.open(filename,'wb') as wave_file:
+        wave_file.setparams(params)
+        wave_file.writeframes(audio_bytes)
+
+# Specify the input filepath and call the input_wave function  
+params,audio_bytes = input_wave(r'''filepath''')
+
+
+#----------------------------------------------------------------
+# function: delay
+# purpose: reads the input file and returns the file content
+# parameter(s): <4> object (audio_bytes),
+#                   _wave_params (params),
+#                   int (offset_ms), 
+#                   int (factor)
+# return:  object (audio_bytes)
+def delay(audio_bytes,params,offset_ms,factor=1):
+    """version 2: delay after 'offset_ms' milliseconds amplified by 'factor'"""
+    #calculate the number of bytes which corresponds to the offset in milliseconds
+    offset= params.sampwidth*offset_ms*int(params.framerate/1000)
+    #create some silence
+    beginning= b'\0'*offset
+    #remove space from the end
+    end= audio_bytes[:-offset]
+    #multiply by the factor
+    multiplied_end= mul(audio_bytes[:-offset],params.sampwidth,factor)
+    return add(audio_bytes, beginning+ multiplied_end, params.sampwidth)
+
+# Specify the output filepath and call the output_wave function  
+output_wave(delay(audio_bytes,params,offset_ms=20, factor=0.75),
+            params, r'''filepath''','delay_20ms_0.75f')
+
