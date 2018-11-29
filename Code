@@ -50,14 +50,15 @@ params,audio_bytes = input_wave(r'''filepath''')
 
 
 #----------------------------------------------------------------
-# function: delay
+# function: flanging
 # purpose: reads the input file and returns the file content
 # parameter(s): <4> object (audio_bytes),
 #                   _wave_params (params),
 #                   int (offset_ms), 
 #                   int (factor)
 # return:  object (audio_bytes)
-def delay(audio_bytes,params,offset_ms,factor=1):
+
+def flanging(audio_bytes,params,offset_ms,factor=1):
     """version 2: delay after 'offset_ms' milliseconds amplified by 'factor'"""
     #calculate the number of bytes which corresponds to the offset in milliseconds
     offset= params.sampwidth*offset_ms*int(params.framerate/1000)
@@ -70,6 +71,6 @@ def delay(audio_bytes,params,offset_ms,factor=1):
     return add(audio_bytes, beginning+ multiplied_end, params.sampwidth)
 
 # Specify the output filepath and call the output_wave function  
-output_wave(delay(audio_bytes,params,offset_ms=20, factor=0.75),
+output_wave(flanging(audio_bytes,params,offset_ms=20, factor=0.75),
             params, r'''filepath''','delay_20ms_0.75f')
 
